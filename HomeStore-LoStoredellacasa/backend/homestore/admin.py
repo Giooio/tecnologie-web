@@ -16,7 +16,8 @@ colors = [
 ]
 
 for color in colors:
-    Color.objects.get_or_create(name=color['name'], code=color['code'])
+    Color.objects.get_or_create(name=color['name'], defaults={'code': color['code']})
+
 
 # Registrazione modello Cart
 @admin.register(Cart)

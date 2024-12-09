@@ -1,0 +1,295 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'homestore/popUp.html' %}
+<style>
+  /* Contenitore principale */
+  .orders-admin-container {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 90%;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  /* Titolo della pagina */
+  .orders-admin-container h1 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  /* Tabella */
+  .orders-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .orders-admin-table th,
+  .orders-admin-table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+  }
+
+  .orders-admin-table th {
+    background-color: #b9001c;
+    color: #ffffff;
+    text-transform: uppercase;
+  }
+
+  /* Riga alternata */
+  .orders-admin-table tr:nth-child(odd) {
+    background-color: #f7f7f7;
+  }
+
+  /* Hover sulle righe */
+  .orders-admin-table tr:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Stile degli status */
+  .status-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: capitalize;
+    color: #ffffff;
+  }
+
+  .status-indicator.pending {
+    background-color: #ffc107;
+  }
+
+  .status-indicator.preparing {
+    background-color: #ff7514; 
+  }
+
+  .status-indicator.ready {
+    background-color: #ffc107; 
+  }
+
+  .status-indicator.completed {
+    background-color: #28a745;
+  }
+
+  .status-indicator.cancelled {
+    background-color: #dc3545;
+  }
+
+  /* Pulsante Azioni */
+  .btn-action {
+    display: inline-block;
+    padding: 6px 10px;
+    color: #ffffff;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin: 0 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-action:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-cancel {
+    background-color: #dc3545;
+  }
+
+  .btn-cancel:hover {
+    background-color: #a71d2a;
+  }
+
+  /* Messaggio "Nessun ordine" */
+  .no-orders-message {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 20px;
+  }
+
+  /* Icona del cestino */
+  .btn-delete {
+    color: #dc3545;
+    font-size: 1.2rem;
+    text-decoration: none;
+  }
+
+  .btn-delete:hover {
+    color: #a71d2a;
+  }
+  
+</style>
+
+<div class="orders-admin-container">
+  <h1>Gestione Ordini</h1>
+
+  <div class="filters-container">
+    <form method="get" class="filters">
+        <label for="user">Utente:</label>
+        <select name="user" id="user" onchange="this.form.submit()">
+            <option value="">Tutti gli utenti</option>
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if selected_user == user.id|stringformat:"s" %}selected{% endif %}>
+                    {{ user.username }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <!-- Filtro per stato -->
+        <label for="status">Stato:</label>
+        <select name="status" id="status" onchange="this.form.submit()">
+            <option value="">Tutti gli stati</option>
+            <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>In preparazione o In attesa di ritiro</option>
+            <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Ritirato</option>
+            <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Annullato</option>
+        </select>
+    </form>
+</div>
+
+
+  {% if orders %}
+    <table class="orders-admin-table">
+      <thead>
+        <tr>
+          <th>ID Ordine</th>
+          <th>Utente</th>
+          <th>Data</th>
+          <th>Prodotti</th>
+          <th>Totale</th>
+          <th colspan="2">Status</th>
+          <th>Azioni</th>
+          <th>Elimina</th> <!-- Nuova colonna per eliminare -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.user.username }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>
+              <ul>
+                {% for item in order.items.all %}
+                  <li>{{ item.product.nome }} (x{{ item.quantity }})</li>
+                {% endfor %}
+              </ul>
+            </td>
+            <td>€{{ order.total }}</td>
+            <td id="status-cell-{{ order.id }}">
+              <span class="status-indicator 
+              {% if order.status == 'pending' and not order.ready_for_pickup %}preparing{% endif %}
+              {% if order.status == 'pending' and order.ready_for_pickup %}ready{% endif %}
+              {% if order.status == 'completed' %}completed{% endif %}
+              {% if order.status == 'cancelled' %}cancelled{% endif %}
+              ">
+                {% if order.status == 'pending' %}
+                    {% if not order.ready_for_pickup %}
+                        <strong style="color: white;">In preparazione</strong>
+                    {% else %}
+                        <strong>In attesa di ritiro</strong>
+                        {% with order.days_left_for_pickup as days_left %}
+                            <br>Mancano {{ days_left }} giorni
+                        {% endwith %}
+                    {% endif %} 
+              {% elif order.status == 'completed' %}
+                  <strong style="color: white;">Ritirato</strong>
+              {% elif order.status == 'cancelled' %}
+                  <strong style="color: white;">Annullato</strong>
+              {% endif %}
+              </span>
+          </td>
+          <td>
+            {%if order.status == 'cancelled' %}
+                    <i class="fas fa-times-circle" style="color: red;"></i>
+            {% elif not order.ready_for_pickup %}
+                  <button class="btn-action mark-ready-btn" data-order-id="{{ order.id }}">
+                      <i class="fas fa-check"></i> Segna come completato
+                  </button>
+                  {% else %}
+                    <i class="fas fa-check-circle" style="color: green;"></i>
+              {% endif %}
+          </td>
+            <td>
+              <a href="{% url 'order_details_admin' order.id %}" class="btn-action">Visualizza</a>
+              <a href="{% url 'cancel_order' order.id %}" class="btn-action btn-cancel">Annulla</a>
+            </td>
+            <td>
+                <button type="button" class="btn-delete" onclick="showPopup({
+                    title: 'Conferma Eliminazione',
+                    message: 'Sei sicuro di voler eliminare questo ordine?',
+                    confirmText: 'Elimina',
+                    cancelText: 'Annulla',
+                    onConfirm: () => { 
+                        window.location.href = '{% url 'delete_order' order.id %}';  // Invia la richiesta per eliminare l'ordine
+                    },
+                    onCancel: () => {}  // Nessuna azione se l'utente annulla
+                })">🗑️</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="no-orders-message">Non ci sono ordini disponibili.</p>
+  {% endif %}
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const buttons = document.querySelectorAll('.mark-ready-btn');
+
+      buttons.forEach(button => {
+          button.addEventListener('click', function () {
+              const orderId = this.getAttribute('data-order-id');
+
+              fetch(`/order/${orderId}/ready/`, {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}', // Include il token CSRF per la sicurezza
+                      'Content-Type': 'application/json'
+                  }
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Errore durante l\'aggiornamento dello stato.');
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  if (data.success) {
+                      const statusCell = document.getElementById(`status-cell-${orderId}`);
+                      statusCell.innerHTML = `
+                          <span class="status-indicator completed">
+                              <i class="fas fa-check-circle" style="color: green;"></i>
+                              <strong>In attesa di ritiro</strong>
+                              <br>Mancano ${data.days_left} giorni
+                          </span>
+                      `;
+
+                      // Rimuovi il pulsante
+                      this.remove();
+                  } else {
+                      alert('Impossibile aggiornare lo stato dell\'ordine.');
+                  }
+              })
+              .catch(error => {
+                  console.error(error);
+                  alert('Errore durante l\'aggiornamento dello stato.');
+              });
+          });
+      });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'homestore/popUp.html' %}
+    <!-- Notifica di successo -->
+    <div id="success-message" class="success-message" style="display: none;">
+        <i class="fas fa-check-circle"></i> Modifica avvenuta con successo!
+    </div>
+
+    <style>
+        h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .questions-table {
+            width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .questions-table th, .questions-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        .questions-table th {
+            background-color: #b9001c;
+            color: white;
+            font-weight: bold;
+        }
+
+        .questions-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .questions-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .common-textarea {
+            width: 800px;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+
+        .answered-textarea {
+            background-color: #e6ffe6;
+            border: 1px solid #b9e0b9;
+            color: #333;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            background-color: #b9001c;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            height: 40px;
+            width: 40px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .submit-button img {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+
+        .submit-button:hover {
+            background-color: #a7001c;
+        }
+
+        /* Stile per la notifica di successo */
+        .success-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+        .success-message i {
+            margin-right: 10px;
+        }
+
+        .delete-button {
+            background-color: #b9001c; /* Rosso per il pulsante di eliminazione */
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            height: 40px;
+            width: 40px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .delete-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .delete-button:hover {
+            background-color: #a7001c;
+        }
+    </style>
+
+    <h2>Gestione delle Domande</h2>
+    
+    <table class="questions-table">
+        <thead>
+            <tr>
+                <th>Utente</th>
+                <th>Domanda</th>
+                <th>Risposta</th>
+                <th colspan="2" style="text-align: center;">Azioni</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in questions %}
+                {% if not question.answer_text %}
+                    <!-- Domande senza risposta -->
+                    <tr>
+                        <td>{{ question.user.username }}</td>
+                        <td>{{ question.question_text }}</td>
+                        <td class="answer-section">
+                            <form method="POST" action="{% url 'manage_questions' %}">
+                                {% csrf_token %}
+                                <textarea name="answer_text_{{ question.id }}" class="common-textarea" placeholder="Scrivi una risposta..."></textarea>
+                                <input type="hidden" name="question_id" value="{{ question.id }}">
+                            </td>
+                            <td>
+                                <button type="submit" name="submit_answer" value="{{ question.id }}" class="submit-button">
+                                    <img src="{% static 'send.png' %}" alt="Invia">
+                                </button>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form method="post" id="remove-question-{{ question.id}}" action="{% url 'delete_question' question.id %}">
+                                {% csrf_token %}
+                            </form>
+                                <button type="button" class="delete-button" onclick="showPopup({
+                                    title: 'Eliminare la domanda?',
+                                    message: 'Sei sicuro di voler eliminare definitivamente questa domanda?',
+                                    confirmText: 'Elimina',
+                                    cancelText: 'Annulla',
+                                    onConfirm: () => { 
+                                        const form = document.getElementById('remove-question-{{ question.id}}');
+                                        if (form) {
+                                            // Invia il modulo se trovato
+                                            form.submit();
+                                        } else {
+                                            console.error('Form non trovato!');
+                                        }
+                                    },
+                                    onCancel: () => {} 
+                                })">
+                                    🗑️
+                                </button>
+                        </td>
+
+                        <td>{{ question.created_at }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            
+            {% for question in questions %}
+                {% if question.answer_text %}
+                    <!-- Domande con risposta esistente -->
+                    <tr class="answered-row">
+                        <td>{{ question.user.username }}</td>
+                        <td>{{ question.question_text }}</td>
+                        <td class="answered">
+                            <form method="POST" action="{% url 'manage_questions' %}" onsubmit="showSuccessMessage(event)">
+                                {% csrf_token %}
+                                <textarea name="answer_text_{{ question.id }}" class="common-textarea answered-textarea">{{ question.answer_text }}</textarea>
+                                <input type="hidden" name="question_id" value="{{ question.id }}">
+                            </td>
+                            <td>
+                                <button type="submit" name="submit_answer" value="{{ question.id }}" class="submit-button">
+                                    <img src="{% static 'send.png' %}" alt="Aggiorna">
+                                </button>
+                            </form>
+                        </td>
+
+                        <td>
+                                <form method="post" id="remove-question-{{ question.id}}" action="{% url 'delete_question' question.id %}">
+                                    {% csrf_token %}
+                                </form>
+                                    <button type="button" class="delete-button" onclick="showPopup({
+                                        title: 'Eliminare la domanda?',
+                                        message: 'Sei sicuro di voler eliminare definitivamente questa domanda?',
+                                        confirmText: 'Elimina',
+                                        cancelText: 'Annulla',
+                                        onConfirm: () => { 
+                                            const form = document.getElementById('remove-question-{{ question.id}}');
+                                            if (form) {
+                                                // Invia il modulo se trovato
+                                                form.submit();
+                                            } else {
+                                                console.error('Form non trovato!');
+                                            }
+                                        },
+                                        onCancel: () => {} 
+                                    })">
+                                        🗑️
+                                    </button>
+                        </td>
+
+                        <td>{{ question.created_at }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        // Funzione per mostrare il messaggio di successo al click del bottone
+        function showSuccessMessage(event) {
+            event.preventDefault();  // Previene il submit normale del form per fare il lavoro via JavaScript
+
+            // Mostra il messaggio di successo
+            document.getElementById('success-message').style.display = 'flex';
+
+            // Simula l'invio del form dopo il messaggio
+            setTimeout(function() {
+                event.target.closest('form').submit();  // Invia il form effettivamente
+            }, 2000);  // Dopo 2 secondi, invia il form
+        }
+
+        // Nasconde il messaggio di successo dopo 5 secondi
+        setTimeout(function() {
+            document.getElementById('success-message').style.display = 'none';
+        }, 5000);
+    </script>
+
+{% endblock %}

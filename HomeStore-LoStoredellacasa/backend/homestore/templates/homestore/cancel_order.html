@@ -1,0 +1,108 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Contenitore principale */
+  .cancel-order-container {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 60%;
+    background: #fefefe;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  /* Titolo */
+  .cancel-order-container h1 {
+    font-size: 1.8rem;
+    color: #b9001c;
+    margin-bottom: 15px;
+  }
+
+  /* Messaggio di avviso */
+  .warning-message {
+    font-size: 1rem;
+    color: #555;
+    margin: 20px 0;
+    line-height: 1.5;
+  }
+
+  .warning-message strong {
+    color: #b9001c;
+  }
+
+  /* Dettagli ordine */
+  .order-summary {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  .order-summary p {
+    margin: 5px 0;
+    color: #333;
+  }
+
+  /* Pulsanti */
+  .action-buttons {
+    margin-top: 20px;
+  }
+
+  .btn-confirm,
+  .btn-cancel {
+    display: inline-block;
+    padding: 10px 20px;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 0 10px;
+  }
+
+  .btn-confirm {
+    background-color: #dc3545;
+  }
+
+  .btn-confirm:hover {
+    background-color: #a71d2a;
+    transform: scale(1.05);
+  }
+
+  .btn-cancel {
+    background-color: #6c757d;
+  }
+
+  .btn-cancel:hover {
+    background-color: #494f54;
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="cancel-order-container">
+  <h1>Annullamento Ordine</h1>
+  <p class="warning-message">
+    Sei sicuro di voler annullare l'ordine <strong>#{{ order.id }}</strong>?<br>
+    Questa azione non può essere annullata e potrebbe influenzare il tuo storico degli ordini.
+  </p>
+
+  <div class="order-summary">
+    <p><strong>Utente:</strong> {{ order.user.username }}</p>
+    <p><strong>Data:</strong> {{ order.created_at }}</p>
+    <p><strong>Totale:</strong> €{{ order.total }}</p>
+    <p><strong>Status attuale:</strong> {{ order.get_status_display }}</p>
+  </div>
+
+  <div class="action-buttons">
+    <a href="{% url 'confirm_cancel_order' order.id %}" class="btn-confirm">Conferma Annullamento</a>
+    <a href="{% url 'manage_orders' %}" class="btn-cancel">Torna Indietro</a>
+  </div>
+</div>
+{% endblock %}

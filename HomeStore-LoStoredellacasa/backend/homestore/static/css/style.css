@@ -1,0 +1,232 @@
+/* styles.css */
+
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+.about{
+    display: flex;
+    align-items: center;
+    margin: 40px;
+}
+.about img{
+    width: 200px;
+    height: 150px;
+    border-radius: 30%;
+    margin-right: 20px;
+    object-fit: cover;
+}
+.about div {
+    max-width: 600px;
+}
+
+.about h2 {
+    margin-bottom: 10px;
+}
+
+.features {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+
+.features div {
+    text-align: center;
+    width: 30%;
+    padding: 20px;
+}
+
+.features img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 15px;
+}
+
+.features h3 {
+    margin-bottom: 10px;
+}
+
+.features p {
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+.footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px 0;
+    border-top: 1px solid #ddd;
+}
+
+.footer div {
+    margin-bottom: 10px;
+}
+
+.login-container {
+    background-color: #ffffff;
+    border: 2px solid #b9001c;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+    color: #b9001c;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background-color: #b9001c;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #a0001c;
+}
+
+p {
+    margin-top: 20px;
+    text-align: center;
+}
+
+p a {
+    color: #b9001c;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+/* Stili per il wrapper e il contenitore del logout */
+.logout-confirm-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f9f9f9; /* Colore di sfondo chiaro */
+}
+
+.logout-confirm-container {
+    background-color: #fff; /* Colore di sfondo bianco */
+    border-radius: 8px; /* Angoli arrotondati */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombra leggera */
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.logout-confirm-container h2 {
+    margin-bottom: 20px;
+    color: #b9001c; /* Colore del testo dell'intestazione */
+    text-align: center;
+}
+
+.logout-confirm-container .form-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Spazio tra i bottoni */
+}
+
+.logout-confirm-container button {
+    background-color: #b9001c; /* Colore di sfondo del bottone */
+    color: #fff; /* Colore del testo del bottone */
+    border: none;
+    border-radius: 4px; /* Angoli arrotondati */
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.logout-confirm-container button:hover {
+    background-color: #a8001b; /* Colore di sfondo al passaggio del mouse */
+}
+
+.register-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0; /* Colore di sfondo per il wrapper */
+    padding: 20px;
+}
+
+.register-container {
+    background-color: #ffffff;
+    border: 2px solid #b9001c;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.register-container h2 {
+    color: #b9001c;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background-color: #b9001c;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #a0001c;
+}

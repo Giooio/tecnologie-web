@@ -1,0 +1,72 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        main {
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            width: calc(100% - 20px);
+        }
+
+        .product-list {
+            margin-top: 20px;
+        }
+
+        .product-list a {
+            display: block;
+            padding: 10px;
+            background-color: #b9001c;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .product-list a:hover {
+            background-color: #a7001c;
+        }
+
+        .confirm-button {
+            background-color: #b9001c;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .confirm-button:hover {
+            background-color: #a7001c;
+        }
+    </style>
+    <main>
+        <h2>Elimina Prodotto</h2>
+        <form method="get" action="{% url 'admin_delete_product' %}">
+            <input type="text" name="search" placeholder="Cerca prodotto...">
+            <button type="submit" class="confirm-button">Cerca</button>
+        </form>
+        
+        <div class="product-list">
+            {% for product in products %}
+                <a href="{% url 'confirm_delete_product' product.id %}">{{ product.nome }}</a>
+            {% empty %}
+                <p>Nessun prodotto trovato.</p>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}

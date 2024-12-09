@@ -1,0 +1,109 @@
+{% extends 'homestore/nav.html' %}
+
+{% block content %}
+<style>
+  /* Contenitore principale */
+  .view-user-container {
+    margin: 30px auto;
+    padding: 30px;
+    max-width: 600px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+  }
+
+  /* Titolo */
+  .view-user-container h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Etichette */
+  .view-user-container .user-info {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+
+  /* Dati utente */
+  .view-user-container .user-data {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 25px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+
+  /* Separatore orizzontale */
+  .view-user-container .separator {
+    width: 100%;
+    height: 1px;
+    background-color: #ddd;
+    margin: 20px 0;
+  }
+
+  /* Annulla Link */
+  .view-user-container .cancel-button {
+    display: inline-block;
+    text-align: center;
+    padding: 10px 20px;
+    margin-top: 30px;
+    font-size: 1rem;
+    color: #ffffff;
+    background-color: #b9001c;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .view-user-container .cancel-button:hover {
+    background-color: #a21a1c;
+  }
+</style>
+
+<div class="view-user-container">
+  <h2>Dettagli Utente</h2>
+
+  <div class="user-info">
+    <strong>Nome Utente:</strong>
+    <p class="user-data">{{ user.username }}</p>
+  </div>
+
+  <div class="user-info">
+    <strong>Nome:</strong>
+    <p class="user-data">{{ user.first_name }}</p>
+  </div>
+
+  <div class="user-info">
+    <strong>Cognome:</strong>
+    <p class="user-data">{{ user.last_name }}</p>
+  </div>
+
+  <div class="user-info">
+    <strong>Numero di Telefono:</strong>
+    <p class="user-data">{{ user.profile.phone }}</p>
+  </div>
+
+  <div class="user-info">
+    <strong>Indirizzo:</strong>
+    <p class="user-data">{{ user.profile.address }}</p>
+  </div>
+
+  <div class="user-info">
+    <strong>Email:</strong>
+    <p class="user-data">{{ user.email }}</p>
+  </div>
+
+</div>
+
+{% endblock %}

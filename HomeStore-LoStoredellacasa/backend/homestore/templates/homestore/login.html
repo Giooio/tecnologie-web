@@ -1,0 +1,54 @@
+{% extends 'homestore/nav.html' %}
+
+{% block content %}
+<style>
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 5px;
+      }
+      
+      .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      
+      .alert p {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+</style>
+<div class="container">
+    <main>
+        <div class="login-wrapper">
+            <div class="login-container">
+                <h2>Accedi al tuo account</h2>
+
+                {% if messages %}
+                    <div class="alert alert-danger">
+                        {% for message in messages %}
+                        <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_username">Username:</label>
+                        <input type="text" id="id_username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_password">Password:</label>
+                        <input type="password" id="id_password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit">Accedi</button>
+                </form>
+                <p>Non sei ancora registrato? <a href="{% url 'register' %}">Registrati</a></p>
+            </div>
+        </div>
+    </main>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'homestore/popUp.html' %}
+    <div id="error-message" class="error-message" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i> Non è possibile acquistare più di tre unità per ogni prodotto!
+    </div>
+
+    <style>
+        .product-detail-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            flex: 1;
+            margin-right: 20px;
+            text-align: center;
+        }
+
+        .product-image img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .product-details {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-details h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .product-details p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .price {
+            font-size: 1.5em;
+            color: #b9001c;
+            margin-bottom: 20px;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .quantity-selector input {
+            width: 60px;
+            text-align: center;
+            margin-left: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .add-to-cart-btn, .buy-now-btn {
+            background-color: #b9001c;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .buy-now-btn {
+            background-color: #ffc107;
+        }
+
+        .add-to-cart-btn:hover, .buy-now-btn:hover {
+            background-color: #a7001c;
+        }
+
+        .buy-now-btn:hover {
+            background-color: #e0a800;
+        }
+        .error-message {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* Puoi cambiare questa posizione per metterlo a destra se preferisci */
+            background-color: #dc3545; /* Colore di sfondo rosso per l'errore */
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            z-index: 1000;
+            border: 2px solid #d9534f; /* Bordo rosso per evidenziare l'errore */
+        }
+        
+        .error-message i {
+            margin-right: 10px;
+        }
+        
+    </style>
+
+    <div class="product-detail-container">
+        <div class="product-image">
+            {% if product.immagine %}
+                <img src="{{ product.immagine.url }}" alt="{{ product.nome }}">
+            {% else %}
+            <p>Nessuna immagine disponibile</p>
+            {% endif %}
+        </div>
+
+        <div class="product-details">
+            <h1>{{ product.nome }}</h1>
+            <p>{{ product.descrizione }}</p>
+            <p class="price">{{ product.prezzo }}€</p>
+
+            <div class="availability">
+                {% if product.stock > 0 %}
+                    <p style="color: green; font-weight: bold;">Disponibile: Sì</p>
+                    {% if product.stock <= 3 %}
+                        <p style="color: orange; font-weight: bold;">Ne restano solo {{ product.stock }}!</p>
+                    {% endif %}
+                {% else %}
+                    <p style="color: red; font-weight: bold;">Disponibile: No</p>
+                {% endif %}
+            </div>
+
+            <div class="product-actions">
+                {% if user.is_authenticated %}
+                    <form action="{% url 'add_to_cart' product.id %}" id="add-product-{{product.id}}" method="post">
+                        {% csrf_token %}
+                        <div class="quantity-selector">
+                            <label for="quantity">Quantità:</label>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="3" 
+                                   {% if product.quantity >= 3 %} disabled {% endif %} oninput="checkQuantity()">
+                        </div>
+
+                        {% if product.colori.count == 1 %}
+                            <div class="color-selector" style="display: flex;">
+                                <label for="color" style="display: inline-block; margin-right: 10px;">Colore:</label>
+                                <div style="background-color: {{ product.colori.first.code }}; width: 30px; height: 30px; border-radius: 50%;"></div>
+                                <input type="hidden" name="color" value="{{ product.colori.first.code }}">
+                            </div>
+                        {% elif product.colori.count > 1 %}
+                            <div class="color-selector" style="display: flex;">
+                                <label for="color" style="display: inline-block; margin-right: 10px;">Colore:</label>
+                                <select name="color" id="color">
+                                    {% for color in product.colori.all %}
+                                        <option value="{{ color.code }}">{{ color.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% else %}
+                            <input type="hidden" name="color" value="{{ product.colori.first.code }}">
+                        {% endif %}
+                    </form>
+
+                    <button type="button" class="add-to-cart-btn" 
+                            onclick="showPopup({
+                                title: 'Aggiungere il prodotto?',
+                                message: 'Sei sicuro di voler aggiungere questo prodotto al carrello?',
+                                confirmText: 'Aggiungi',
+                                cancelText: 'Annulla',
+                                onConfirm: () => { 
+                                    const form = document.getElementById('add-product-{{product.id}}');
+                                    if (form) {
+                                        form.submit();
+                                    } else {
+                                        console.error('Form non trovato!');
+                                    }
+                                },
+                                onCancel: () => {} 
+                            })"
+                            {% if product.stock <= 0 %} disabled {% endif %} Non disponibile
+                            {% if user.is_staff %}disabled {% endif %}
+                            >
+                        {% if product.stock <= 0 %}
+                            Non disponibile
+                        {% elif product.quantity >= 3 %}
+                            Non più di tre
+                        {% else %}
+                            Aggiungi al carrello
+                        {% endif %}
+                    </button>
+                {% else%}
+                    <button type="button" class="add-to-cart-btn" onclick="showPopup({
+                        title: 'Devi loggarti',
+                        message: 'Devi essere loggato per aggiungere i prodotti al carrello. Non sei loggato? Registrati',
+                        confirmText: 'Log In',
+                        cancelText: 'Registrati',
+                        onConfirm: () => { 
+                            window.location.href = '{% url 'login' %}';
+                        },
+                        onCancel: () => {
+                            window.location.href = '{% url 'register' %}';
+                        } 
+                    })"
+                    {% if user.is_staff %}disabled {% endif %}
+                    >
+                        Aggiungi al carrello
+                    </button>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkQuantity() {
+            var quantity = document.getElementById('quantity').value;
+            var errorMessage = document.getElementById('error-message');
+
+            if (quantity > 3) {
+                // Limita la quantità a 3
+                document.getElementById('quantity').value = 3;
+
+                // Mostra il messaggio di errore
+                errorMessage.style.display = 'block';
+            } else {
+                // Nasconde il messaggio di errore
+                errorMessage.style.display = 'none';
+            }
+        }
+
+        window.onload = function() {
+            document.getElementById('error-message').style.display = 'flex';
+
+            // Nasconde il messaggio di errore dopo 5 secondi
+            setTimeout(function() {
+                document.getElementById('error-message').style.display = 'none';
+            }, 5000); // Messaggio visibile per 5 secondi
+        };
+
+        
+    </script>
+{% endblock %}

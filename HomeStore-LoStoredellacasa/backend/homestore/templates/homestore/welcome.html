@@ -1,0 +1,556 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .main-banner {
+                text-align: center;
+                padding: 50px 0;
+                background-color: #e0e0e0;
+                position: relative;
+            }
+            .main-banner img {
+                max-width: 100%;
+            }
+            .store-address {
+                position: absolute;
+                bottom: 10px; 
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 18px;
+            }
+            .store-address .highlight {
+                color: #b9001c; 
+            }
+            .about {
+                display: flex;
+                justify-content: center;
+                padding: 50px 50px;
+                background-color: #fff;
+            }
+            .about img {
+                margin-right: 40px;
+                border-radius: 50%;
+                max-width: 250px;
+                height: 250px;
+            }
+            .about div {
+                max-width: 600px;
+            }
+            .about h2 {
+                color: #b9001c;
+            }
+            .flex-container {
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-start;
+                padding: 20px;
+                gap: 30px; 
+            }
+            .questions-section {
+                flex: 1;
+                min-width: 55%;
+                max-width: 55%;
+            }
+            
+            .forum-section {
+                flex: 1;
+                min-width: 40%;
+                max-width: 40%;
+                display: flex;
+                flex-direction: column; 
+                align-items: flex-start;
+            }
+
+            .forum-section h3 {
+                color: #b9001c;
+                margin-bottom: 20px;
+            }
+            .forum-section input[type="text"], .forum-section textarea {
+                width: 80%;
+                padding: 10px;
+                font-size: 16px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                margin-bottom: 10px;
+            }
+
+            .forum-section button {
+                padding: 10px 15px;
+                background-color: #b9001c;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .forum-section button:hover {
+                background-color: #a3001d;
+            }
+            
+            .footer {
+                background-color: #333;
+                color: white;
+                padding: 40px 20px;
+                font-family: Arial, sans-serif;
+            }
+            
+            .footer-content {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 30px; /* Spaziatura tra le sezioni */
+                margin-bottom: 30px;
+            }
+            
+            .footer-logo-container {
+                flex: 1 1 100%; /* Rende questa sezione a larghezza piena su schermi piccoli */
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            
+            .footer-logo-img {
+                max-width: 150px;
+                margin-bottom: 10px;
+            }
+            
+            .footer-quote {
+                font-style: italic;
+                font-size: 18px;
+                color: white;
+            }
+            
+            .footer-links, .footer-hours {
+                flex: 1 1 300px; /* Le sezioni non dovrebbero essere più strette di 300px */
+            }
+            
+            .footer-links h4, .footer-hours h4 {
+                color: #b9001c;
+                margin-bottom: 15px;
+            }
+            
+            .footer-links ul, .footer-hours ul {
+                list-style: none;
+                padding-left: 0;
+            }
+            
+            .footer-links li, .footer-hours li {
+                margin-bottom: 8px;
+            }
+            
+            .footer-links a, .footer-hours a {
+                text-decoration: none;
+                color: white;
+                font-size: 1em;
+                transition: color 0.3s ease;
+            }
+            
+            .footer-links a:hover, .footer-hours a:hover {
+                color: #b9001c;
+            }
+            
+            .footer-bottom-links {
+                flex: 1 1 100%;
+                text-align: center;
+                margin-top: 20px;
+            }
+            
+            .footer-bottom-links a {
+                margin: 0 15px;
+                color: white;
+                text-decoration: none;
+                font-size: 1.1em;
+                transition: color 0.3s ease;
+            }
+            
+            .footer-bottom-links a:hover {
+                color: #b9001c;
+            }
+            
+            .footer-bottom {
+                text-align: center;
+                font-size: 0.9em;
+                margin-top: 20px;
+                border-top: 1px solid #444;
+                padding-top: 15px;
+            }
+            
+            .features {
+                display: flex;
+                justify-content: space-around;
+                padding: 50px 20px;
+                background-color: #f0f0f0;
+            }
+            .features div {
+                text-align: center;
+                max-width: 300px;
+            }
+            .features img {
+                max-width: 100px;
+                margin-bottom: 20px;
+            }
+            .question-form-container {
+                margin: 30px auto;
+                max-width: 600px;
+                text-align: center;
+            }
+            .success-message {
+                background-color: #d4edda;
+                color: #155724;
+                padding: 10px;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+            
+            .questions-section h3 {
+                color: #b9001c;
+                margin-bottom: 15px;
+            }
+            
+            .question-answer {
+                margin-bottom: 15px;
+                padding: 15px;
+                background-color: #f7f7f7;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+            }
+            
+            .question-answer p {
+                margin: 5px 0;
+            }
+            
+            .toggle-questions {
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+                color: #b9001c;
+                font-weight: bold;
+                text-decoration: none;
+                cursor: pointer;
+            }
+            
+            .toggle-questions:hover {
+                text-decoration: underline;
+            }
+
+            .scrollable {
+                max-height: 300px; /* Imposta l'altezza massima desiderata */
+                overflow-y: auto; /* Abilita lo scroll verticale */
+                overflow-x: auto; /* Abilita lo scroll orizzontale */
+                border: 1px solid #ccc; /* Aggiunge un bordo per una migliore visibilità */
+                padding: 10px; /* Aggiunge un padding interno */
+                margin-top: 10px; /* Spazio sopra il div */
+            }
+
+            .popup {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                justify-content: center;
+                align-items: center;
+            }
+            .popup-content {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                width: 400px;
+            }
+            .popup button {
+                margin-top: 15px;
+                background-color: #b9001c;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .popup button:hover {
+                background-color: #a3001d;
+            }
+            .images {
+                display: flex;
+                flex-direction: row; /* Disposizione verticale */
+                align-items: center; /* Centrare i contenuti orizzontalmente */
+                justify-content: center; /* Centrare i contenuti verticalmente */
+                text-align: center;
+                gap: 20px; /* Spazio tra immagine e testo */
+                padding: 20px;
+                background-color: #f9f9f9; /* Sfondo chiaro per contrasto */
+                border-radius: 10px; /* Angoli arrotondati per l'intera sezione */
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Leggera ombra per rilievo */
+            }
+            .images img {
+                max-width: 300px; /* Limita la larghezza massima dell'immagine */
+                height: auto; /* Mantiene proporzioni */
+                border-radius: 8px; /* Angoli arrotondati */
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Ombra per far risaltare l'immagine */
+                margin-bottom: 15px;
+            }
+            /* Contenitore del testo */
+            .text-container {
+                max-width: 600px; /* Limita la larghezza massima del testo per leggibilità */
+                color: #333; /* Colore testo scuro per contrasto */
+            }
+
+            /* Titolo */
+            .text-container h3 {
+                font-size: 1.5em; /* Dimensione del titolo più grande */
+                color: #b9001c; /* Colore rosso per richiamare il tema */
+                margin-bottom: 10px;
+            }
+
+            /* Paragrafo */
+            .text-container p {
+                font-size: 1.1em; /* Leggermente più grande per leggibilità */
+                line-height: 1.6; /* Spaziatura tra le righe per migliorare il testo */
+                margin: 0;
+            }
+            .success-user-message {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background-color: #28a745;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                font-size: 16px;
+                z-index: 1000;
+            }
+    
+            .success-user-message i {
+                margin-right: 10px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="success-user-message" class="success-user-message" style="display: none;">
+            <i class="fas fa-check-circle"></i> Domanda inviata con successo!
+        </div>
+
+        <div class="main-banner">
+            <img src="{% static 'neg.png' %}" alt="Negozio">
+            <div class="store-address">
+                <span class="highlight">Siamo in</span> Corso Canalchiaro, 54/56 - 41121 Modena
+            </div>
+        </div>
+        <div class="about">
+            <img src="{% static 'chisiamo.png' %}" alt="Foto dei Titolari">
+            <div>
+                <h2>Chi siamo?</h2>
+                <p>HomeStore di Modena è il negozio di riferimento per la biancheria per la casa di alta qualità. I nostri titolari, con anni di esperienza nel settore, selezionano personalmente i prodotti per garantire ai nostri clienti la massima soddisfazione.</p>
+            </div>
+        </div>
+        
+        <div class="flex-container">
+        {% if not user.is_superuser %}
+            
+                <div class="questions-section">
+                    <h3>Domande e Risposte</h3>
+                    <div id="questions" class="scrollable">
+                        {% for question in answered_questions %}
+                            <div class="question-answer">
+                                <p><strong>{{question.user.username}}:</strong> {{ question.question_text }}</p>
+                                <p><strong>Hom:</strong> {{ question.answer_text }}</p>
+                            </div>
+                        {% endfor %}
+                        {% for question in unanswered_questions %}
+                        <div class="question-answer">
+                            <p><strong>{{ question.user.username }}:</strong> {{ question.question_text }}</p>
+                            <p><em>In attesa di risposta...</em></p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                <div class="forum-section">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h2 style="color: #b9001c; margin: 0;">Hai una domanda?</h2>
+                        <h3 style="margin: 0;">
+                            <a href="#" id="ask-question-link" style="text-decoration: underline; color: #b9001c;">Clicca qui</a>
+                        </h3>
+                    </div>
+
+                <!-- Pop-up per inviare una domanda -->
+                <div class="popup" id="question-popup">
+                    <div class="popup-content">
+                        <h3>Fai una domanda</h3>
+
+                        <form id="question-user-form" method="POST" action="{% url 'welcome' %}" onsubmit="showSuccessMessage(event)">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            {% if form.errors.question_text %}
+                                <div style="color: red; font-size: 0.9em;">
+                                    {{ form.errors.question_text.0 }}
+                                </div>
+                            {% endif %}
+                            <button type="submit">Invia Domanda</button>
+                        </form>
+                        <button id="close-popup">Chiudi</button>
+                    </div>
+                </div>
+            
+                <div class="images">
+                    <img src="{% static 'cuorePa.png' %}" alt="Cuore" class="footer-logo-img">
+                    <div class="text-container">
+                        <h3>Il Nostro Impegno</h3>
+                        <p>Abbiamo a cuore i vostri interessi e le vostre domande. Il nostro obiettivo principale è ascoltarvi con attenzione e fare tutto il possibile per rispondere alle vostre esigenze.</p>
+                    </div>
+                </div>
+                </div>
+        </div>
+        {% endif %}
+
+            
+        {% endif %}
+    
+        <script>
+            // Funzionalità per aprire il pop-up
+            document.getElementById("ask-question-link").addEventListener("click", function(event){
+                event.preventDefault();
+                document.getElementById("question-popup").style.display = "flex";
+            });
+
+            // Funzionalità per chiudere il pop-up
+            document.getElementById("close-popup").addEventListener("click", function(){
+                document.getElementById("question-popup").style.display = "none";
+            });
+        
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.getElementById('question-user-form')
+                form.addEventListener('submit', async function (event) {
+                    event.preventDefault(); 
+                    const formData = new FormData(form);
+                    const questionText = formData.get('question_text');
+                    
+                    if (!questionText.trim()) {
+                        alert("Il campo domanda è obbligatorio.");
+                        return; // Interrompi l'invio del form
+                    }
+
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'), // Aggiungi il token CSRF
+                        },
+                    });
+        
+                    if (response.ok) {
+                        // Svuota il form solo se la risposta è positiva
+                        form.reset();
+                        document.getElementById("question-popup").style.display = "none";
+                    } else {
+                        alert("Errore nell'invio della domanda.");
+                    }
+                });
+            });
+        
+            // Funzione per ottenere il CSRF token dal cookie
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.startsWith(name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+        function showSuccessMessage(event) {
+            event.preventDefault(); 
+
+            document.getElementById('success-user-message').style.display = 'flex';
+
+            setTimeout(function() {
+                event.target.closest('form').submit();  
+            }, 2000);  
+        }
+
+        // Nasconde il messaggio di successo dopo 5 secondi
+        setTimeout(function() {
+            document.getElementById('success-user-message').style.display = 'none';
+        }, 5000);
+            
+            
+        </script>
+    </div>
+
+        <div class="features">
+            <div>
+                <img src="{% static 'verified.png' %}" alt="qualità">
+                <h3>Qualità</h3>
+                <p>Nei negozi Hom trovi le migliori marche di Biancheria per la Casa, prodotti selezionati in tela e raso di cotone, con stampe originali e moderne. Hom propone solo articoli di qualità garantita e certificata.</p>
+            </div>
+            <div>
+                <img src="{% static 'drycleaning.png' %}" alt="Servizi">
+                <h3>Servizi</h3>
+                <p>Il personale di vendita è attento e competente, è possibile riservare i prodotti desiderati, scegliere gli articoli in diverse varianti anche su ordinazione e modificare i prodotti su misura con il servizio di sartoria.</p>
+            </div>
+            <div>
+                <img src="{% static 'sell.png'%}" alt="Prezzo">
+                <h3>Prezzo</h3>
+                <p>Nei negozi Hom la qualità è sempre al prezzo più basso. Tante le offerte dedicate alle singole marche o a prodotti stagionali. Inoltre con la Fidelity Card Hom tutti i clienti possono usufruire di uno sconto ulteriore immediato.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="footer-content">
+                <!-- Sezione Logo o Citazione -->
+                <div class="footer-logo-container">
+                    <img src="{% static 'logo2.png' %}" alt="Logo HomeStore" class="footer-logo-img">
+                    <p class="footer-quote">"La casa è dove inizia la felicità. Scopri il tuo stile da HomeStore!"</p>
+                </div>
+        
+                <!-- Sezione Contatti -->
+                <div class="footer-links">
+                    <h4>Contatti</h4>
+                    <ul>
+                        <li><a href="tel:059237120"><i class="fas fa-phone-alt"></i> 059237120</a></li>
+                        <li><a href="mailto:info@homstore.com"><i class="fas fa-envelope"></i> info@homstore.com</a></li>
+                        <li><a href="https://www.google.com/maps?q=Corso+Canalchiaro,+54/56+-+41121+Modena" target="_blank"><i class="fas fa-map-marker-alt"></i> Corso Canalchiaro, 54/56 - 41121 Modena</a></li>
+                    </ul>
+                </div>
+        
+                <!-- Sezione Orari di Apertura -->
+                <div class="footer-hours">
+                    <h4><i class="fas fa-clock"></i> Orari di apertura</h4>
+                    <ul>
+                        <li>Lun: 9:00-12:30, 15:00-19:30</li>
+                        <li>Mar: 9:00-12:30, 15:00-19:30</li>
+                        <li>Mer: 9:00-12:30, 15:00-19:30</li>
+                        <li>Gio: 9:00-12:30</li>
+                        <li>Ven: 9:00-12:30, 15:00-19:30</li>
+                        <li>Sab: 9:00-12:30, 15:00-19:30</li>
+                        <li>Dom: 9:00-12:30</li>
+                    </ul>
+                </div>
+            </div>
+        
+            <div class="footer-bottom">
+                <p>&copy; 2024 HomeStore. Tutti i diritti riservati.</p>
+            </div>
+        </div>
+        
+        {% endblock %}

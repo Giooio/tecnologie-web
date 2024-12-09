@@ -1,0 +1,110 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        main {
+            background-color: white;
+            padding: 30px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+        section h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #b9001c; /* Colore del bordo inferiore */
+            padding-bottom: 5px;
+        }
+        section a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #b9001c; /* Colore di sfondo dei bottoni */
+            color: white; /* Colore del testo dei bottoni */
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        section a:hover {
+            background-color: #a7001c;
+        }
+        .notification-color-question {
+            background-color: #b9001c;
+        }
+        .notification-color-orders {
+            background-color: #ffc107;
+        }
+        .notification-badge {
+            
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+        }
+
+        .notification {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+        .notification .close-btn {
+            background-color: transparent;
+            border: none;
+            color: #721c24;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .notification .close-btn:hover {
+            color: #5c1f1f;
+        }
+    </style>
+    <header>
+        <h2>Benvenuto nella Dashboard Amministratore</h2>
+    </header>
+    <main>
+        <section>
+            <h2>Gestione Prodotti</h2>
+            <a href="{% url 'admin_add_product' %}">Aggiungi Nuovo Prodotto</a>
+            <a href="{% url 'admin_delete_product' %}" style="margin-left: 10px;">Elimina Prodotto</a>
+            <a href="{% url 'admin_edit_product' %}" style="margin-left: 10px;">Modifica Prodotto</a>
+        </section>
+
+        <section>
+            <h2>Gestione Ordini 
+                {% if pending_orders_count > 0 %}
+                    <span class="notification-badge notification-color-orders">{{ pending_orders_count  }}</span>
+                {% endif %}
+            </h2>
+            <a href="{% url 'manage_orders'%}">Visualizza Ordini</a>
+        </section>
+
+        <section>
+            <h2>Gestione Utenti</h2>
+            <a href="{% url 'manage_users'%}">Gestisci Utenti</a>
+        </section>
+
+        <section>
+            <h2>Rispondi alle domande
+                {% if unanswered_questions_count > 0 %}
+                    <span class="notification-badge notification-color-question">{{ unanswered_questions_count }}</span>
+                {% endif %}
+            </h2>
+            <a href="{% url 'manage_questions' %}">Rispondi alle domande</a>
+        </section>
+    </main>
+{% endblock %}

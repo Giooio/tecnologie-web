@@ -1,0 +1,162 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Contenitore principale */
+  .order-details-container {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 80%;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  /* Titolo della pagina */
+  .order-details-container h1 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  /* Informazioni ordine */
+  .order-info {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .order-info p {
+    font-size: 1rem;
+    color: #555;
+    margin: 5px 0;
+  }
+
+  /* Tabella prodotti */
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .products-table th,
+  .products-table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+  }
+
+  .products-table th {
+    background-color: #b9001c;
+    color: #ffffff;
+    text-transform: uppercase;
+  }
+
+  .products-table tr:nth-child(odd) {
+    background-color: #f7f7f7;
+  }
+
+  .products-table tr:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Totale finale */
+  .total-row {
+    background-color: #f9f9f9;
+    font-weight: bold;
+    border-top: 2px solid #ddd;
+  }
+
+  /* Pulsanti azioni */
+  .action-buttons {
+    margin-top: 20px;
+  }
+
+  .btn-action {
+    display: inline-block;
+    padding: 8px 15px;
+    color: #ffffff;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin: 0 10px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-action:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-cancel {
+    background-color: #dc3545;
+  }
+
+  .btn-cancel:hover {
+    background-color: #a71d2a;
+  }
+
+  .btn-completed {
+    background-color: #28a745;
+  }
+
+  .btn-completed:hover {
+    background-color: #1e7e34;
+  }
+</style>
+
+<div class="order-details-container">
+  <h1>Dettagli Ordine #{{ order.id }}</h1>
+
+  <!-- Informazioni generali -->
+  <div class="order-info">
+    <p><strong>Utente:</strong> {{ order.user.username }}</p>
+    <p><strong>Data:</strong> {{ order.created_at }}</p>
+    <p><strong>Totale:</strong> €{{ order.total }}</p>
+  </div>
+
+  <!-- Tabella prodotti -->
+  <table class="products-table">
+    <thead>
+      <tr>
+        <th>Prodotto</th>
+        <th>Quantità</th>
+        <th>Prezzo unitario</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order.items.all %}
+        <tr>
+          <td style="display: flex; align-items: center; justify-content: start;">
+            <div style="flex-shrink: 0; margin-right: 15px;">
+                <img src="{{ item.product.immagine.url }}" alt="{{ item.product.nome }}" style="width: 100px; height: 100px; object-fit: cover;">
+            </div>
+            <div style="display: flex; flex-direction: column; justify-content: start;">
+                <span>{{ item.product.nome }}</span>
+                <p>Colore: <span style="background-color: {{ item.color }}; width: 20px; height: 20px; display: inline-block; margin-top: 5px;"></span></p>
+            </div>
+        </td>
+          <td>{{ item.quantity }}</td>
+          <td>€{{ item.product.prezzo }}</td>
+        </tr>
+      {% endfor %}
+      
+      <tr class="total-row">
+        <td colspan="2"></td>
+        <td style="background-color: grey; color: white;">Totale Ordine: €{{ order.total }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Azioni -->
+  <div class="action-buttons">
+    <a href="{% url 'update_order_status' order_id=order.id status='completed' %}" class="btn-action btn-completed">Segna come Ritirato</a>
+    <a href="{% url 'update_order_status' order_id=order.id status='cancelled' %}" class="btn-action btn-cancel">Annulla Ordine</a>
+  </div>  
+</div>
+{% endblock %}

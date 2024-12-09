@@ -1,0 +1,180 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .category-title {
+            background-color: #b9001c; 
+            padding: 10px;
+            text-align: center;
+            color: #fff; 
+        }
+
+        .filters-container {
+            text-align: right;
+            padding: 10px 20px;
+        }
+        .filters {
+            display: inline-block;
+        }
+
+        .filters label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .filters select {
+            padding: 5px;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+
+        .product-item {
+            position: relative;
+            text-align: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            transition: box-shadow 0.3s ease;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .product-item img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+
+        .product-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-info {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .product-description {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .product-description p {
+            margin: 0;
+        }
+
+        /* Classe per troncamento con "..." */
+        .truncated {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .no-products-message {
+            text-align: center;
+            color: #b9001c;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px 30px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border: 2px solid #b9001c;
+            width: auto;  
+            white-space: nowrap;  
+        }
+
+        .no-products-message i {
+            margin-right: 10px;
+        }
+
+        .no-products-container {
+            grid-column: span 1;
+            grid-row: span 1;
+            width: fit-content;
+        }
+
+        .price {
+            color: #b9001c;
+        }
+    </style>
+
+<header>
+    <div class="category-title">
+        <h2>Prodotti nella categoria Tutti i Prodotti</h2>
+    </div>
+</header>
+
+<div class="filters-container">
+    <form method="get" class="filters">
+
+        <label for="color">Colore:</label>
+            <select name="color" id="color" onchange="this.form.submit()">
+                <option value="">Tutti i colori</option>
+                {% for color in colors %}
+                    <option value="{{ color.id }}" {% if selected_color == color.id|stringformat:"s" %}selected{% endif %}>
+                        {{ color.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+        <label for="order">Ordina per:</label>
+        <select name="order" id="order" onchange="this.form.submit()">
+            <option value="price_asc" {% if order_by == 'price_asc' %}selected{% endif %}>Prezzo crescente</option>
+            <option value="price_desc" {% if order_by == 'price_desc' %}selected{% endif %}>Prezzo decrescente</option>
+        </select>
+
+        <label for="availability">Disponibilità:</label>
+            <select name="availability" id="availability" onchange="this.form.submit()">
+                <option value="">Tutti</option>
+                <option value="available" {% if availability == 'available' %}selected{% endif %}>Disponibili</option>
+                <option value="unavailable" {% if availability == 'unavailable' %}selected{% endif %}>Non Disponibili</option>
+            </select>
+    </form>
+</div>
+
+<main>
+    <section>
+
+    <div class="product-grid">
+        {% for product in products %}
+            <div class="product-item">
+                <a href="{% url 'product_detail' product.id %}" class="product-info">
+                    {% if product.immagine %}
+                        <img src="{{ product.immagine.url }}" alt="{{ product.nome }}">
+                    {% else %}
+                        <p>Nessuna immagine disponibile</p>
+                    {% endif %}
+                    <h3>{{ product.nome }}</h3>
+                    <div class="product-description">
+                        <!-- Troncamento della descrizione a 15 parole -->
+                        <p class="truncated">{{ product.descrizione|truncatewords:15 }}</p>
+                    </div>
+                    <p class="price">{{ product.prezzo }}€</p>
+                </a>
+            </div>
+        {% empty %}
+        <div class="no-products-container">
+            <div class="no-products-message">
+                <i class="fas fa-exclamation-circle"></i> Nessun prodotto disponibile.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+</main>
+
+{% endblock %}

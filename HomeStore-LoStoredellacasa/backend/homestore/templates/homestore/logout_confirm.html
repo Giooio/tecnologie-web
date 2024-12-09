@@ -1,0 +1,19 @@
+{% extends 'homestore/nav.html' %}
+
+{% block content %}
+    <main>
+        <div class="logout-confirm-wrapper">
+            <div class="logout-confirm-container">
+                <h2>Sei sicuro di voler uscire dal tuo account?</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="hidden" name="next" value="{{ next }}" />
+                        <button type="submit" name="confirm" value="yes">Sì</button>
+                        <button type="submit" name="confirm" value="no">Resta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+{% endblock %}

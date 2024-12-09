@@ -1,0 +1,81 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        main {
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 80%; /* Larghezza ridotta */
+            max-width: 500px; /* Form più stretto */
+            margin: 20px auto; /* Centrato */
+            background-color: white;
+        }
+
+        .warning {
+            color: #b9001c;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .product-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center; /* Centrato */
+            align-items: center;
+            gap: 20px; /* Distanza tra i bottoni */
+            margin-top: 30px; /* Distanza uniforme */
+        }
+
+        .confirm-button, .cancel-button {
+            padding: 10px 20px; /* Bottoni un po' più grandi */
+            border-radius: 4px;
+            margin-top: 0px;
+            font-size: 16px; /* Font maggiore per visibilità */
+            width: auto; /* Evita che occupino tutta la pagina */
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .confirm-button {
+            background-color: #b9001c;
+            color: white;
+            border: 2px solid #b9001c;
+        }
+
+        .confirm-button:hover {
+            background-color: #a7001c;
+        }
+
+        .cancel-button {
+            background-color: white;
+            color: #b9001c;
+            border: 2px solid #b9001c;
+            text-decoration: none; /* Rimuove la sottolineatura */
+        }
+
+        .cancel-button:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+    <main>
+        <h2>Conferma Eliminazione</h2>
+        <p class="warning">Sei sicuro di voler eliminare definitivamente il seguente prodotto?</p>
+        <p class="product-name">{{ product.nome }}</p>
+        
+        <div class="button-container">
+            <form method="post" action="{% url 'confirm_delete_product' product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="confirm-button">Elimina</button>
+            </form>
+            <a href="{% url 'admin_delete_product' %}" class="cancel-button">Annulla</a>
+        </div>
+        
+    </main>
+{% endblock %}

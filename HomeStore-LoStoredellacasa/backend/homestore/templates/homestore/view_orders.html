@@ -1,0 +1,181 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Contenitore principale */
+  .orders-container {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 90%;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  /* Titolo della pagina */
+  .orders-container h1 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  /* Tabella */
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+  }
+
+  .orders-table th {
+    background-color: #b9001c;
+    color: #ffffff;
+    text-transform: uppercase;
+  }
+
+  /* Riga alternata */
+  .orders-table tr:nth-child(odd) {
+    background-color: #f7f7f7;
+  }
+
+  /* Hover sulle righe */
+  .orders-table tr:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Pulsante "Dettagli" */
+  .btn-details {
+    display: inline-block;
+    padding: 6px 10px;
+    color: #ffffff;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-details:hover {
+    background-color: #0056b3;
+  }
+
+  /* Stile degli status */
+  .status-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: capitalize;
+    color: #ffffff;
+  }
+
+  .status-indicator.pending {
+    background-color: #ffc107;
+  }
+
+  .status-indicator.preparing {
+    background-color: #ff7514; 
+  }
+
+  .status-indicator.ready {
+    background-color: #ffc107; 
+  }
+
+
+  .status-indicator.completed {
+    background-color: #28a745;
+  }
+
+  .status-indicator.cancelled {
+    background-color: #dc3545;
+  }
+
+  .status-indicator.processing {
+    background-color: #17a2b8;
+  }
+
+  /* Messaggio "Nessun ordine" */
+  .no-orders-message {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="orders-container">
+  <h1>I tuoi ordini</h1>
+  <div class="filters-container">
+    <form method="get" class="filters">
+      <label for="status">Stato:</label>
+            <select name="status" id="status" onchange="this.form.submit()">
+                <option value="">Tutti gli stati</option>
+                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>In preparazione o In attesa di ritiro</option>
+                <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Ritirato</option>
+                <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Annullato</option>
+            </select>
+        </form>
+    </div>
+
+  {% if orders %}
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>ID Ordine</th>
+          <th>Data</th>
+          <th>Totale</th>
+          <th>Status</th>
+          <th>Dettagli</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>€{{ order.total }}</td>
+            <td>
+              <span class="status-indicator 
+              {% if order.status == 'pending' and not order.ready_for_pickup %}preparing{% endif %}
+              {% if order.status == 'pending' and order.ready_for_pickup %}ready{% endif %}
+              {% if order.status == 'completed' %}completed{% endif %}
+              {% if order.status == 'cancelled' %}cancelled{% endif %}
+              ">
+              {% if order.status == 'pending' %}
+                    {% if not order.ready_for_pickup %}
+                        <strong style="color: white;">In preparazione</strong>
+                    {% else %}
+                        <strong>In attesa di ritiro</strong>
+                        {% with order.days_left_for_pickup as days_left %}
+                            <br>Mancano {{ days_left }} giorni
+                        {% endwith %}
+                    {% endif %} 
+              {% elif order.status == 'completed' %}
+                  <strong style="color: white;">Ritirato</strong>
+              {% elif order.status == 'cancelled' %}
+                  <strong style="color: white;">Annullato</strong>
+              {% endif %}
+              </span>
+          </td>
+            <td>
+              <a href="{% url 'order_details' order.id %}" class="btn-details">Dettagli</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="no-orders-message">Non hai ancora effettuato ordini.</p>
+  {% endif %}
+</div>
+{% endblock %}

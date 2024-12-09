@@ -1,0 +1,72 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        main {
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .warning {
+            color: #b9001c;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .product-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .confirm-button, .cancel-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .confirm-button {
+            background-color: #b9001c;
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background-color: #a7001c;
+        }
+
+        .cancel-button {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .cancel-button:hover {
+            background-color: #ccc;
+        }
+
+        .button-group {
+            margin-top: 30px;
+        }
+    </style>
+    <main>
+        <h2>Conferma Eliminazione</h2>
+        <p class="warning">Sei sicuro di voler eliminare definitivamente il seguente prodotto?</p>
+        <p class="product-name">{{ item.product.nome }}</p>
+        
+        <div class="button-group">
+            <form method="post" action="{% url 'remove_from_cart' item.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="confirm" value="yes">
+                <button type="submit" class="confirm-button">Elimina</button>
+            </form>
+            <a href="{% url 'view_cart' %}" class="cancel-button">Annulla</a>
+        </div>
+    </main>
+{% endblock %}

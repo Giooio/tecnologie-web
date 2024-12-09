@@ -1,0 +1,21 @@
+<!-- homestore/templates/homestore/user_activity.html -->
+{% extends 'homestore/nav.html' %}
+{% block content %}
+    <h2>Attività Recente di {{ user.username }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Azioni</th>
+                <th>Data e Ora</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in activities %}
+                <tr>
+                    <td>{{ activity.action }}</td>
+                    <td>{{ activity.timestamp }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

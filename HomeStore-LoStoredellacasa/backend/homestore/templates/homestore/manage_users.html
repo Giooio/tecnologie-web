@@ -1,0 +1,158 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="page-title">Gestione degli Utenti</h2>
+        
+        <div class="table-container">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Nome Utente</th>
+                        <th>Email</th>
+                        <th>Stato</th>
+                        <th>Data di Registrazione</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="status {{ user.is_active|yesno:"active,inactive" }}">
+                                    {{ user.is_active|yesno:"Attivo,Disattivato" }}
+                                </span>
+                            </td>
+                            <td>{{ user.date_joined|date:"d/m/Y" }}</td>
+                            <td class="action-buttons">
+                                <a href="{% url 'edit_user' user.id %}" class="btn btn-edit">Info</a>
+                                {% if user.is_active %}
+                                    <a href="{% url 'toggle_user_status' user.id %}?status=inactive" class="btn btn-disable">Disattiva</a>
+                                {% else %}
+                                    <a href="{% url 'toggle_user_status' user.id %}?status=active" class="btn btn-enable">Attiva</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .user-table th, .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .user-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .status.active {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .status.inactive {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;  /* Distanza tra i pulsanti */
+            align-items: center;
+        }
+
+        .action-buttons a {
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+            width: 100px; 
+        }
+
+        .btn-edit {
+            background-color: white;
+            border: 2px solid #b9001c;
+            color: #b9001c;
+        }
+
+        .btn-edit:hover {
+            background-color: silver;
+            color: white;
+        }
+
+        .btn-disable {
+            background-color: #b9001c;
+            border: 2px solid #b9001c;
+            color: white;
+        }
+
+        .btn-disable:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-enable {
+            background-color: #2ecc71;
+            border: 2px solid #2ecc71;
+            color: white;
+        }
+
+        .btn-enable:hover {
+            background-color: #27ae60;
+        }
+
+        /* Alternanza colori righe */
+        .user-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .user-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+{% endblock %}

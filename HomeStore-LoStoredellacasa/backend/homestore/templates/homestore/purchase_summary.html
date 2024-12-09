@@ -1,0 +1,113 @@
+{% extends 'homestore/nav.html' %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .title {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .title h1 {
+        margin: 0;
+        font-size: 2em;
+        color: #444;
+    }
+    .title p {
+        margin: 10px 0 0;
+        color: #666;
+        font-size: 0.9em;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    table thead {
+        background-color: #f4f4f4;
+    }
+    table th, table td {
+        text-align: left;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    table th {
+        color: #555;
+        font-weight: bold;
+    }
+    table tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+    table tr:hover {
+        background-color: #f1f1f1;
+    }
+    .total {
+        text-align: right;
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-top: 20px;
+        color: #444;
+    }
+    .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        margin-top: 20px;
+        text-decoration: none;
+        background-color: #555;
+        color: #fff;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 1em;
+        transition: background-color 0.3s;
+    }
+    .btn:hover {
+        background-color: #333;
+    }
+</style>
+
+<div class="container">
+    <!-- Titolo -->
+    <div class="title">
+        <h1>Riepilogo dell'Acquisto</h1>
+        <p>Grazie per il tuo acquisto! I tuoi prodotti saranno messi da parte e potranno essere ritirati in negozio entro <strong>10 giorni</strong>.</p>
+    </div>
+
+    <!-- Dettagli del carrello -->
+    <table>
+        <thead>
+            <tr>
+                <th>Prodotto</th>
+                <th style="text-align: center;">Quantità</th>
+                <th style="text-align: right;">Prezzo Totale</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.product.nome }}
+                    <span style="background-color: {{ item.color }}; width: 15px; height: 15px; display: inline-block;"></span>
+                </td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">€{{ item.product.prezzo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totale -->
+    <p class="total">Totale: €{{ cart_total }}</p>
+
+    <!-- Pulsante per tornare alla home -->
+    <a href="{% url 'welcome' %}" class="btn">Torna alla Home</a>
+</div>
+{% endblock %}

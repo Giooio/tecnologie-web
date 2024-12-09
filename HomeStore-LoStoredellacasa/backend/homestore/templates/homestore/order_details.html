@@ -1,0 +1,95 @@
+{% extends 'homestore/nav.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .order-details-container {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 90%;
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .order-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .order-header h1 {
+    font-size: 1.8rem;
+    color: #b9001c;
+    margin: 10px 0;
+  }
+
+  .order-header p {
+    font-size: 1rem;
+    color: #555;
+  }
+
+  .order-items {
+    margin-top: 20px;
+  }
+
+  .order-items ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .order-items li {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.95rem;
+  }
+
+  .order-items li:last-child {
+    border-bottom: none;
+  }
+
+  .btn-back {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #b9001c;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    text-align: center;
+  }
+
+  .btn-back:hover {
+    background-color: #a10019;
+  }
+</style>
+
+<div class="order-details-container">
+  <div class="order-header">
+    <h1>Dettagli ordine #{{ order.id }}</h1>
+    <p><strong>Data ordine:</strong> {{ order.created_at }}</p>
+    <p><strong>Totale:</strong> €{{ order.total }}</p>
+  </div>
+
+  <div class="order-items">
+    <h3>Articoli ordinati:</h3>
+    <ul>
+      {% for item in order.items.all %}
+        <li style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #ddd;">
+          <img src="{{ item.product.immagine.url }}" alt="{{ item.product.nome }}" style="width: 100px; height: 100px; object-fit: cover; margin-right: 15px;">
+          <div style="line-height: 1.5;">
+            <strong>{{ item.product.nome }}</strong>
+            <p style="margin: 0; margin-bottom: 5px; text-align: left;">
+                Colore: <span style="background-color: {{ item.color }}; width: 20px; height: 20px; display: inline-block; vertical-align: middle;"></span>
+            </p>
+            <span style="display: block; margin-bottom: 5px;">Quantità: {{ item.quantity }}</span>
+            <span style="display: block;">Prezzo: €{{ item.product.prezzo }}</span>
+        </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <a href="{% url 'view_orders' %}" class="btn-back">Torna agli ordini</a>
+</div>
+{% endblock %}

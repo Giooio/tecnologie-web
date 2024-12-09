@@ -1,5 +1,4 @@
-# tecnologie-web
-Progetto per il corso di Tecnologie Web
+# Progetto per il corso di Tecnologie Web
 Tecnologie Utilizzate
 
     Backend: Django

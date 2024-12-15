@@ -20,6 +20,7 @@ from django.urls import reverse
 from .recommendation import *
 from django.http import JsonResponse 
 from django.core.mail import send_mass_mail
+from django.db import DatabaseError
 # Create your views here.
 
 def welcome(request):
@@ -76,29 +77,22 @@ def login_view(request):
         username = request.POST['username']
         password = request.POST['password']
 
-        # Debugging
-        print(f"Username inserito: {username}")
-        print(f"Esiste utente? {User.objects.filter(username=username).exists()}")
-
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            print("Autenticazione riuscita")
-            if user.is_active:
-                login(request, user)
-                if user.is_superuser:
-                    return redirect('admin_dashboard')
-                return redirect('welcome')
-            else:
+        user = User.objects.filter(username=username).first()
+        if user:
+            if not user.is_active:  # Utente disattivato
                 messages.error(request, "Il tuo account è stato disattivato. Contatta l'amministratore.")
-                return redirect('login')
+                return render(request, 'homestore/login.html')
+        
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            if user.is_superuser:
+                return redirect('admin_dashboard')
+            return redirect('welcome')
         else:
-            try:
-                test_user = User.objects.get(username=username)
-                print("Utente trovato, ma la password non corrisponde.")
-            except User.DoesNotExist:
-                print("Utente non trovato.")
             messages.error(request, "Nome utente o password non validi.")
-            return redirect('login')
+            return render(request, 'homestore/login.html')
+            
     return render(request, 'homestore/login.html')
 
 def logout_view(request):
@@ -182,7 +176,8 @@ def confirm_delete_product(request, product_id):
     if request.method == 'POST':
         product.delete()
         return redirect('admin_dashboard')
-    return render(request, 'homestore/confirm_delete.html', {'product': product})
+    return render(request, 'homestore/confirm_delete.html', {'product': product, 'show_back_button': True,
+        'back_url': '/dashboard/' })
 
 def modifica_prodotto(request):
     if request.method == 'GET':
@@ -202,7 +197,8 @@ def modifica_prodotto_form(request, product_id):
             return redirect('admin_dashboard')
     else:
         form = ProdottoForm(instance=product)
-    return render(request, 'homestore/modifica_prodotto_form.html', {'form': form})
+    return render(request, 'homestore/modifica_prodotto_form.html', {'form': form, 'show_back_button': True,
+        'back_url': '/dashboard/' })
 
 def category_list(request, category_slug=None):
     category_name = request.GET.get('category_name')  
@@ -353,7 +349,7 @@ def delete_question(request, question_id):
 
 @login_required
 def manage_users(request):
-    users = User.objects.all()
+    users = User.objects.all().filter(is_staff=False)
     return render(request, 'homestore/manage_users.html', {'users': users, 'show_back_button': True,
         'back_url': '/dashboard/'  })
 
@@ -527,9 +523,15 @@ def view_cart(request):
     ).exclude(id__in=cart_product_ids).distinct()
     
     recommended_by_association = Product.objects.exclude(id__in=cart_items.values_list('product_id', flat=True)).order_by('-sold_count')[:5]
-    recommended_by_category = Product.objects.filter(
-        categoria__in=product_categories
-    ).exclude(id__in=cart_product_ids).distinct()[:5]
+    recommended_by_category = []
+    for category in product_categories:
+        products_in_category = Product.objects.filter(
+            categoria=category
+        ).exclude(id__in=cart_product_ids).distinct()[:3]  # Limita a 2 prodotti per categoria
+        recommended_by_category.extend(products_in_category)
+
+    # Limita il risultato totale a 5 prodotti
+    recommended_by_category = recommended_by_category[:5]
     recommended_by_collaboration = related_products[:5]
     
     for order in orders_with_products:
@@ -674,7 +676,7 @@ def manage_orders(request):
     selected_user = request.GET.get('user', '')
     selected_status = request.GET.get('status', None)
 
-    users = User.objects.all()
+    users = User.objects.all().filter(is_staff=False)
 
     orders = Order.objects.all().order_by('-created_at')
 
@@ -772,13 +774,12 @@ def update_order_status(request, order_id, status):
     if status in dict(Order.STATUS_CHOICES):  
         order.status = status
         order.save()
-        
-    print(order.status)
 
-    orders = Order.objects.all()
+    orders = Order.objects.all().order_by('-created_at')
     for order in orders:
         order.days_left = order.days_left_for_pickup() 
-    return render(request, 'homestore/manage_orders.html', {'orders': orders})
+    return render(request, 'homestore/manage_orders.html', {'orders': orders, 'show_back_button': True,
+        'back_url': '/dashboard/'})
 
 
 def cancel_order(request, order_id):

@@ -4,40 +4,80 @@ from django.utils import timezone
 from datetime import timedelta
 from homestore.models import *
 from django.urls import reverse
+from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+
 
 class OrderTestCase(TestCase):
     def setUp(self):
+        # Creazione utente per gli ordini
         user = User.objects.create_user(username='testuser', password='testpassword')
-        self.order = Order.objects.create(
+        
+        # Ordine non pronto per il ritiro
+        self.order_not_ready = Order.objects.create(
             user=user,
-            created_at=timezone.now() - timedelta(days=5),  # 5 giorni fa
-            total=100.00
+            created_at=timezone.now() - timedelta(days=5),  # Creato 5 giorni fa
+            total=100.00,
+            ready_for_pickup=False,
         )
 
-    def test_days_left_for_pickup(self):
-        """Testa il calcolo dei giorni rimanenti per il ritiro."""
-        expected_deadline = self.order.created_at + timedelta(days=10)
-        remaining_days = self.order.days_left_for_pickup()
+        # Ordine pronto per il ritiro con deadline impostata
+        self.order_ready_with_deadline = Order.objects.create(
+            user=user,
+            created_at=timezone.now() - timedelta(days=3),  # Creato 3 giorni fa
+            total=100.00,
+            ready_for_pickup=True,
+            pickup_deadline=timezone.now() + timedelta(days=7),  # Deadline tra 7 giorni
+        )
 
-        # Verifica che i giorni rimanenti siano corretti
-        self.assertEqual(remaining_days, (expected_deadline - timezone.now()).days)
+        # Ordine pronto per il ritiro senza deadline impostata
+        self.order_ready_without_deadline = Order.objects.create(
+            user=user,
+            created_at=timezone.now() - timedelta(days=2),  # Creato 2 giorni fa
+            total=100.00,
+            ready_for_pickup=True,
+            pickup_deadline=None,  # Deadline mancante
+        )
+
+    def test_days_left_for_pickup_not_ready(self):
+        """Testa che il metodo restituisca 0 se l'ordine non è pronto per il ritiro."""
+        self.assertEqual(self.order_not_ready.days_left_for_pickup(), 0)
+
+    def test_days_left_for_pickup_with_deadline(self):
+        """Testa il calcolo corretto dei giorni rimanenti quando c'è una deadline."""
+        remaining_days = (self.order_ready_with_deadline.pickup_deadline - timezone.now()).days
+        self.assertEqual(self.order_ready_with_deadline.days_left_for_pickup(), max(remaining_days, 0))
+
+    def test_days_left_for_pickup_without_deadline(self):
+        """Testa che una nuova deadline venga impostata quando manca."""
+        self.assertIsNone(self.order_ready_without_deadline.pickup_deadline)  # Controlla che la deadline inizialmente non esista
+
+        days_left = self.order_ready_without_deadline.days_left_for_pickup()
+
+        self.order_ready_without_deadline.refresh_from_db()  # Ricarica l'ordine per aggiornare i campi dal database
+        self.assertIsNotNone(self.order_ready_without_deadline.pickup_deadline)  # Ora la deadline deve essere impostata
+        expected_days_left = (self.order_ready_without_deadline.pickup_deadline - timezone.now()).days
+        self.assertEqual(days_left, max(expected_days_left, 0))
 
     def test_days_left_for_pickup_expired(self):
-        """Testa il caso in cui i giorni rimanenti sono 0 o negativi."""
-        # Simula un ordine scaduto (11 giorni fa)
-        self.order.created_at = timezone.now() - timedelta(days=11)
-        self.order.save()
+        """Testa che il metodo restituisca 0 se la deadline è scaduta."""
+        expired_order = Order.objects.create(
+            user=self.order_ready_with_deadline.user,
+            created_at=timezone.now() - timedelta(days=15),  # Creato 15 giorni fa
+            ready_for_pickup=True,
+            pickup_deadline=timezone.now() - timedelta(days=5),  # Scaduto 5 giorni fa
+        )
+        self.assertEqual(expired_order.days_left_for_pickup(), 0)
 
-        remaining_days = self.order.days_left_for_pickup()
-        self.assertEqual(remaining_days, 0)  # Non possono esserci giorni negativi
-
-
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth.models import User
-from homestore.models import Product, Cart, CartItem
-from django.http import JsonResponse
+    def test_days_left_for_pickup_near_deadline(self):
+        """Testa il caso limite con deadline vicina."""
+        near_deadline_order = Order.objects.create(
+            user=self.order_ready_with_deadline.user,
+            created_at=timezone.now() - timedelta(days=9),  # Creato 9 giorni fa
+            ready_for_pickup=True,
+            pickup_deadline=timezone.now() + timedelta(hours=1),  # Deadline tra 1 ora
+        )
+        self.assertEqual(near_deadline_order.days_left_for_pickup(), 0)  # Orario vicino viene arrotondato a 0 giorni
 
 class CartUpdateTestCase(TestCase):
     

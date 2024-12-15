@@ -96,12 +96,22 @@ class Order(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     ready_for_pickup = models.BooleanField(default=False)
+    pickup_deadline = models.DateTimeField(null=True, blank=True)
     
     def days_left_for_pickup(self):
-        """Calcola i giorni rimanenti per il ritiro."""
-        deadline = self.created_at + timedelta(days=10)
-        remaining_days = (deadline - timezone.now()).days
-        return max(remaining_days, 0)
+        if self.ready_for_pickup:
+            # Se l'ordine è pronto per il ritiro, calcola la scadenza dei 10 giorni a partire da quel momento
+            deadline = self.pickup_deadline
+            if not deadline:  # Se la deadline non è stata impostata, impostala ora
+                deadline = timezone.now() + timedelta(days=10)
+                self.pickup_deadline = deadline
+                self.save()
+
+            remaining_days = (deadline - timezone.now()).days
+            return max(remaining_days, 0)
+        else:
+            # Se non è pronto per il ritiro, ritorna 0
+            return 0
     
     def __str__(self):
         return f"Ordine #{self.id} - {self.user.username}"

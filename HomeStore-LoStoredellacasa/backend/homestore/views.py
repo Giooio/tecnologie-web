@@ -510,9 +510,11 @@ def view_cart(request):
         cart = Cart.objects.get(user=request.user)
     except Cart.DoesNotExist:
         cart = Cart.objects.create(user=request.user)
-        
+    
     cart_items = cart.items.all()  
     cart_total = cart.get_total_price() 
+    
+    orders = Order.objects.all()
     
     cart_product_ids = [item.product.id for item in cart_items]
     product_categories = cart_items.values_list('product__categoria', flat=True).distinct()
@@ -520,11 +522,10 @@ def view_cart(request):
         cart_items__product__id__in=cart_product_ids
     ).exclude(user=request.user).distinct()
     
-    
     related_products = Product.objects.filter(
         orderitem__order__in=orders_with_products
     ).exclude(id__in=cart_product_ids).distinct()
-
+    
     recommended_by_association = Product.objects.exclude(id__in=cart_items.values_list('product_id', flat=True)).order_by('-sold_count')[:5]
     recommended_by_category = Product.objects.filter(
         categoria__in=product_categories
@@ -607,7 +608,6 @@ def purchase_summary(request):
         
         cart_total = sum(item.get_total_price() for item in cart_items)
         order = Order.objects.create(user=request.user, total=cart_total)
-        
         
 
         for item in cart_items:
@@ -715,8 +715,8 @@ def mark_ready_for_pickup(request, order_id):
                 order.ready_for_pickup = True
                 order.save()
 
-                # Imposta la scadenza per il ritiro (7 giorni)
-                days_left = 7
+                # Imposta la scadenza per il ritiro (10 giorni)
+                days_left = 10
                 order.pickup_deadline = date.today() + timedelta(days=days_left)
                 order.save()
 
@@ -776,6 +776,8 @@ def update_order_status(request, order_id, status):
     print(order.status)
 
     orders = Order.objects.all()
+    for order in orders:
+        order.days_left = order.days_left_for_pickup() 
     return render(request, 'homestore/manage_orders.html', {'orders': orders})
 
 
@@ -794,3 +796,4 @@ def delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     order.delete()
     return redirect('manage_orders') 
+

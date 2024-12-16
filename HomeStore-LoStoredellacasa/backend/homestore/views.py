@@ -45,7 +45,6 @@ def welcome(request):
     else:
         form = QuestionForm()
 
-    # Ordina prima le domande con risposta e poi quelle senza
     answered_questions = Question.objects.filter(is_answered=True).order_by('-created_at')
     unanswered_questions = Question.objects.filter(is_answered=False).order_by('-created_at')
 
@@ -79,7 +78,7 @@ def login_view(request):
 
         user = User.objects.filter(username=username).first()
         if user:
-            if not user.is_active:  # Utente disattivato
+            if not user.is_active: 
                 messages.error(request, "Il tuo account è stato disattivato. Contatta l'amministratore.")
                 return render(request, 'homestore/login.html')
         
@@ -200,7 +199,7 @@ def modifica_prodotto_form(request, product_id):
     return render(request, 'homestore/modifica_prodotto_form.html', {'form': form, 'show_back_button': True,
         'back_url': '/dashboard/' })
 
-def category_list(request, category_slug=None):
+def category_list(request):
     category_name = request.GET.get('category_name')  
     order_by = request.GET.get('order', 'price_asc')  
     selected_color_id = request.GET.get('color', None)
@@ -237,18 +236,16 @@ def category_list(request, category_slug=None):
     })
     
 def all_products(request):
-    # Recupera il parametro 'order' dalla query string, con un valore predefinito
     order_by = request.GET.get('order', 'price_asc')  
     selected_color_id = request.GET.get('color', None)
     availability = request.GET.get('availability')
 
-    # Logica di ordinamento
     if order_by == 'price_asc':
-        products = Product.objects.all().order_by('prezzo')  # Ordina per prezzo crescente
+        products = Product.objects.all().order_by('prezzo')  
     elif order_by == 'price_desc':
-        products = Product.objects.all().order_by('-prezzo')  # Ordina per prezzo decrescente
+        products = Product.objects.all().order_by('-prezzo')  
     else:
-        products = Product.objects.all()  # Ordina senza filtro
+        products = Product.objects.all()  
         
     if selected_color_id:
         products = products.filter(colori__id=selected_color_id)
@@ -260,7 +257,6 @@ def all_products(request):
         
     colors = Color.objects.all()
 
-    # Passa i prodotti ordinati e il valore selezionato al template
     return render(request, 'homestore/all_products.html', {
         'products': products,
         'order_by': order_by,  
@@ -280,20 +276,16 @@ def product_detail(request, product_id):
         except Cart.DoesNotExist:
             cart = None
         
-        # Controlla se il carrello esiste
         if cart:
-            # Controlla la quantità del prodotto nel carrello
             cart_item = CartItem.objects.filter(cart=cart, product=product).first()
             if cart_item:
                 if cart_item.quantity > 3:
-                    # Se la quantità del prodotto è 3, non permettere aggiunte
                     error_message = f"Non puoi aggiungere più di 3 unità di {product.nome} al tuo carrello."
                 else:
                     error_message = None
             else:
                 error_message = None
             
-            # Controlla il numero di prodotti unici nel carrello
             if cart.items.count() >= 5:
                 error_message = error_message or "Hai già 5 prodotti unici nel carrello. Rimuovi alcuni articoli per aggiungerne di nuovi."
 
@@ -406,11 +398,9 @@ def add_to_cart(request, product_id):
     except Cart.DoesNotExist:
         cart = Cart.objects.create(user=request.user)
     
-    # Recupera il prodotto
     product = get_object_or_404(Product, id=product_id)
     color = request.POST.get('color', None) 
     
-    # Recupera la quantità dal POST (di default 1)
     try:
         quantity = int(request.POST.get('quantity', 1))
     except ValueError:
@@ -419,16 +409,13 @@ def add_to_cart(request, product_id):
     if quantity <= 0:
         return redirect('product_detail', product_id=product_id)
     
-    # Recupera i prodotti unici nel carrello
     unique_product_ids = cart.items.values_list('product', flat=True).distinct()  # Ottieni solo gli ID dei prodotti unici
     print(f"Numero di prodotti unici nel carrello: {len(unique_product_ids)}")
     
     if len(unique_product_ids) >= 5:
-        # Limite raggiunto, non puoi aggiungere un altro prodotto
         messages.error(request, "Non è possibile aggiungere più di 5 prodotti unici nel carrello.")
         return redirect('view_cart')
     
-    # Aggiungi o aggiorna l'articolo nel carrello
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, color=color)
     
     if not created:
@@ -436,30 +423,25 @@ def add_to_cart(request, product_id):
     else:
         cart_item.quantity = min(quantity, 3)
         
-    if created and cart.items.count() >= 5:  # Se l'articolo è nuovo e il limite di 5 è raggiunto
+    if created and cart.items.count() >= 5:  
         messages.error(request, "Non è possibile aggiungere più di 5 prodotti unici nel carrello.")
         return redirect('view_cart')
     
-    cart_item.save()  # Salva l'articolo nel carrello
+    cart_item.save()  
 
     return redirect('view_cart')
 
 def cart_remove(request, product_id):
-    # Recupera il carrello dell'utente
     cart = Cart.objects.get(user=request.user)
     
-    # Recupera il prodotto da rimuovere
     product = get_object_or_404(Product, id=product_id)
     
     try:
-        # Try to get the CartItem
         cart_item = CartItem.objects.get(cart=cart, product=product)
         cart_item.delete()
     except CartItem.DoesNotExist:
-        # If no CartItem is found
         pass
     except CartItem.MultipleObjectsReturned:
-        # If multiple CartItems are found, delete them all
         CartItem.objects.filter(cart=cart, product=product).delete()
     
     return redirect('view_cart')
@@ -468,30 +450,25 @@ def cart_remove(request, product_id):
 @login_required
 def cart_update(request, product_id):
     if request.method == 'POST':
-        # Ottieni il nuovo valore della quantità dal POST
         try:
             quantity = int(request.POST.get('quantity'))
             if quantity <= 0:
                 return JsonResponse({'success': False, 'message': 'La quantità deve essere maggiore di zero'})
             
-            # Trova il carrello e il prodotto
             cart = Cart.objects.get(user=request.user)
             product = get_object_or_404(Product, id=product_id)
             
-            # Trova o crea l'articolo nel carrello
             cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
             
-            # Aggiorna la quantità
             if quantity > 3:
                 return JsonResponse({'success': False, 'message': 'Non puoi aggiungere più di 3 unità di questo prodotto'})
             
             cart_item.quantity = quantity
             cart_item.save()
 
-            # Calcola il nuovo totale per questo articolo
-            total_price = cart_item.get_total_price()  # Supponendo che tu abbia un metodo `get_total_price` nel tuo modello `CartItem`
+            
+            total_price = cart_item.get_total_price()  
 
-            # Restituisci una risposta JSON con il successo e il nuovo totale
             return JsonResponse({
                 'success': True,
                 'total': total_price
@@ -527,10 +504,9 @@ def view_cart(request):
     for category in product_categories:
         products_in_category = Product.objects.filter(
             categoria=category
-        ).exclude(id__in=cart_product_ids).distinct()[:3]  # Limita a 2 prodotti per categoria
+        ).exclude(id__in=cart_product_ids).distinct()[:3]  
         recommended_by_category.extend(products_in_category)
 
-    # Limita il risultato totale a 5 prodotti
     recommended_by_category = recommended_by_category[:5]
     recommended_by_collaboration = related_products[:5]
     
@@ -550,7 +526,6 @@ def view_cart(request):
         'back_url': '/tutti-i-prodotti/'
     })
 
-class SessionCart:
     """Classe per gestire il carrello nella sessione."""
     def __init__(self, request):
         self.session = request.session
@@ -606,7 +581,7 @@ def purchase_summary(request):
         cart_items = CartItem.objects.filter(cart__user=request.user)
 
         if not cart_items:
-            return redirect('view_cart')  # Reindirizza al carrello se vuoto
+            return redirect('view_cart')  
         
         cart_total = sum(item.get_total_price() for item in cart_items)
         order = Order.objects.create(user=request.user, total=cart_total)
@@ -630,14 +605,12 @@ def purchase_summary(request):
             'cart_total': cart_total,  
         })
     
-    # Se non è una richiesta POST, reindirizza a view_cart
     return redirect('view_cart')
 
 @login_required
 def update_pickup_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
-    # Aggiorna lo stato in base al tempo
     days_left = order.days_left_for_pickup()
     if days_left == 0 and order.pickup_status == 'pending':
         order.pickup_status = 'cancelled'
@@ -709,20 +682,16 @@ def mark_ready_for_pickup(request, order_id):
     if request.method == 'POST':
         print(f"Request ricevuta per ordine {order_id}")
         try:
-            # Recupera l'ordine
             order = get_object_or_404(Order, id=order_id)
             
-            # Se l'ordine non è pronto per il ritiro, aggiorna lo stato
             if not order.ready_for_pickup:
                 order.ready_for_pickup = True
                 order.save()
 
-                # Imposta la scadenza per il ritiro (10 giorni)
                 days_left = 10
                 order.pickup_deadline = date.today() + timedelta(days=days_left)
                 order.save()
 
-                # Preparazione dell'email
                 subject = "Il tuo ordine è pronto per il ritiro"
                 message = f"""
                 Ciao {order.user.username},
@@ -736,19 +705,17 @@ def mark_ready_for_pickup(request, order_id):
                 Cordiali saluti,
                 HomeStore
                 """
-                user_email = order.user.email  # Supponiamo che tu abbia un campo email nell'utente
+                user_email = order.user.email  
 
 
-                # Invia la mail (per testarla nel terminale, usa il backend console di Django)
                 send_mail(
                     subject,
                     message,
-                    'noreply@homestore.com',  # Puoi usare l'email che preferisci
+                    'noreply@homestore.com',  
                     [user_email],
-                    fail_silently=False,  # Alza un'eccezione se il mail server fallisce
+                    fail_silently=False,  
                 )
 
-                # Risposta di successo
                 return JsonResponse({'success': True, 'days_left': days_left})
 
             return JsonResponse({'success': False, 'error': 'L\'ordine è già pronto per il ritiro.'})
@@ -756,7 +723,6 @@ def mark_ready_for_pickup(request, order_id):
             print(f"Errore: {e}")
             return JsonResponse({'success': False, 'error': str(e)})
 
-    # Risposta se il metodo non è valido
     return JsonResponse({'success': False, 'error': 'Metodo non valido.'})
 
 

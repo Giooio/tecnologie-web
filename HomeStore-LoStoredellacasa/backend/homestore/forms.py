@@ -18,7 +18,7 @@ class ProdottoForm(forms.ModelForm):
     def clean_stock(self):
         stock = self.cleaned_data.get('stock')
         if stock in (None, ''):
-            return 0  # Impostiamo 0 se stock è None o vuoto
+            return 0  
         return stock
 
 class CustomUserRegistrationForm(forms.ModelForm):

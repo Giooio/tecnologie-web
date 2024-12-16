@@ -6,6 +6,8 @@ from homestore.models import *
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from homestore.forms import ProdottoForm  
+
 
 
 class OrderTestCase(TestCase):
@@ -176,12 +178,6 @@ class CartUpdateTestCase(TestCase):
 
 
 
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth.models import User
-from homestore.models import Question
-from homestore.forms import QuestionForm
-
 class SubmitQuestionTestCase(TestCase):
 
     def setUp(self):
@@ -229,9 +225,6 @@ class SubmitQuestionTestCase(TestCase):
 
 
 
-from django.test import TestCase
-from django.urls import reverse
-from homestore.models import Product, Color
 
 class CategoryListViewTest(TestCase):
     def setUp(self):
@@ -327,10 +320,6 @@ class CategoryListViewTest(TestCase):
 
 
 
-from django.test import TestCase
-from django.urls import reverse
-from homestore.models import Product
-from homestore.forms import ProdottoForm  # Suppongo che il form si chiami ancora ProdottoForm
 
 class AggiungiProdottoViewTest(TestCase):
     
@@ -388,14 +377,6 @@ class AggiungiProdottoViewTest(TestCase):
 
 
 
-
-
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth.models import User
-from .models import Order, CartItem, Product, Cart
-from datetime import timedelta
-from django.utils import timezone
 
 class ManageOrdersViewTest(TestCase):
 
